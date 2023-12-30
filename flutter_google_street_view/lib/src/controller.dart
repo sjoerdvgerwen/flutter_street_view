@@ -93,6 +93,12 @@ class StreetViewController {
         viewId: id, initSetting: initSetting);
   }
 
+  StreamController<StreetViewPanoramaCamera> _cameraChangeStreamController =
+      StreamController<StreetViewPanoramaCamera>.broadcast();
+
+  Stream<StreetViewPanoramaCamera> get onCameraChange =>
+      _cameraChangeStreamController.stream;
+
   /// Animate camera to a given position over a specified duration.
   ///
   /// [duration] unit is ms.
@@ -112,6 +118,8 @@ class StreetViewController {
 
   /// Return camera setting, bearing, tilt and zoom.
   Future<StreetViewPanoramaCamera> getPanoramaCamera() async {
+    print("hoi " + viewId.toString());
+
     return _streetViewFlutterPlatform.getPanoramaCamera(viewId);
   }
 
@@ -488,6 +496,12 @@ class StreetViewController {
     _streetViewFlutterPlatform
         .onMarkerTap(viewId: viewId)
         .listen((MarkerTapEvent e) => _streetViewState.onMarkerTap(e.value));
+    _streetViewFlutterPlatform
+        .onCameraChange(viewId: viewId)
+        .listen((CameraChangeEvent e) {
+      final newCamera = e.value;
+      _cameraChangeStreamController.add(newCamera);
+    });
   }
 
   void dispose() {
